@@ -1,19 +1,35 @@
-.POSIX:
+# dwm - dynamic menu
 
-PREFIX = /usr/local
-CC = gcc
+include config.mk
 
-dwmblocks: dwmblocks.o
-	$(CC) dwmblocks.o -lX11 -o dwmblocks
-dwmblocks.o: dwmblocks.c config.h
-	$(CC) -c dwmblocks.c
+BINFILE    = $(SYS)/bin/$(BINNAME)
+CFILES     = $(SRC)/$(BINNAME).c $(DEPS)
+OFILES     = $(patsubst $(SRC)%.c,$(BLD)%.o,$(CFILES))
+INSTALLED  = $(DESTDIR)$(PREFIX)/bin/$(BINNAME)
+
+.PHONY: all man install dist
+all: $(BINFILE) man
+dist: clean
+man: $(MFILES)
+
+$(BLD)/%.o: $(CFILES)
+	mkdir -p $(BLD)
+	$(CC) $(CFLAGS) -o $@ -c $(@:$(BLD)%.o=$(SRC)%.c)
+
+$(BINFILE): $(OFILES) $(WATCH)
+	mkdir -p $(SYS)/bin
+	$(CC) $(LDFLAGS) -o $@ $(filter %.o,$^)
+	chmod 755 $@
+
+.PHONY: install
+install: $(BINFILE) $(TOINSTALL)
+	mkdir -p "$(DESTDIR)$(PREFIX)"
+	cp -ft $(DESTDIR)$(PREFIX)/bin $^
+
+.PHONY: uninstall
+uninstall: $(INSTALLED)
+	rm -f $^
+
+.PHONY: clean
 clean:
-	rm -f *.o *.gch dwmblocks
-install: dwmblocks
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp -f dwmblocks $(DESTDIR)$(PREFIX)/bin
-	chmod 755 $(DESTDIR)$(PREFIX)/bin/dwmblocks
-uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/dwmblocks
-
-.PHONY: clean install uninstall
+	rm -rf  $(BLD) $(SYS)
