@@ -9,7 +9,7 @@ MAN        = man
 SYS        = sys
 PREFIX     = /usr/local
 MANDIR     = 
-WATCH      = $(SRC)/config.h
+WATCH      = ${SRC}/config.h
 DEPS       = 
 
 X11INC = /usr/X11R6/include
